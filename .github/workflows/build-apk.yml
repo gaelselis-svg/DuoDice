@@ -1,0 +1,57 @@
+name: Build DuoDice APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android API 37
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-37" "build-tools;36.0.0"
+
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.6.0"
+
+      - name: Extract DuoDice source
+        run: |
+          rm -rf source
+          mkdir source
+          unzip -q DuoDice-Android.zip -d source
+
+      - name: Build debug APK
+        working-directory: source/DuoDice
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Prepare APK
+        run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuoDice-APK
+          path: DuoDice.apk
+          if-no-files-found: error
+          retention-days: 30
