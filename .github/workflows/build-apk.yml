@@ -27,10 +27,10 @@ jobs:
         with:
           packages: platform-tools
 
-      - name: Install Android API 37
+      - name: Install Android SDK 36
         run: |
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-37" "build-tools;36.0.0"
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Set up Gradle 9.6
         uses: gradle/actions/setup-gradle@v4
@@ -41,7 +41,7 @@ jobs:
         run: |
           rm -rf source
           mkdir source
-          unzip -q DuoDice-Android.zip -d source
+          unzip -q DuoDice-Android-v2.zip -d source
 
       - name: Build debug APK
         working-directory: source/DuoDice
