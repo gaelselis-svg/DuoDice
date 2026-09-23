@@ -27,25 +27,25 @@ jobs:
         with:
           packages: platform-tools
 
-      - name: Install Android SDK 36
+      - name: Install Android SDK 35
         run: |
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Set up Gradle 9.6
+      - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "9.6.0"
+          gradle-version: "8.9"
 
       - name: Extract DuoDice source
         run: |
           rm -rf source
           mkdir source
-          unzip -q DuoDice-Android-v4.zip -d source
+          unzip -q DuoDice-Android-v5.zip -d source
 
       - name: Build debug APK
         working-directory: source/DuoDice
-        run: gradle --no-daemon :app:assembleDebug
+        run: gradle --no-daemon :app:assembleDebug --stacktrace
 
       - name: Prepare APK
         run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice.apk
