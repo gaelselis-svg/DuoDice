@@ -41,7 +41,7 @@ jobs:
         run: |
           rm -rf source
           mkdir source
-          unzip -q DuoDice-Android-v2.zip -d source
+          unzip -q DuoDice-Android-v3.zip -d source
 
       - name: Build debug APK
         working-directory: source/DuoDice
