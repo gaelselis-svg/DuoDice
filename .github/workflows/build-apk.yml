@@ -41,19 +41,19 @@ jobs:
         run: |
           rm -rf source
           mkdir source
-          unzip -q DuoDice-Android-v7.zip -d source
+          unzip -q DuoDice-Android-v7.1.zip -d source
 
       - name: Build debug APK
         working-directory: source/DuoDice
         run: gradle --no-daemon :app:assembleDebug --stacktrace
 
       - name: Prepare APK
-        run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice-v7.apk
+        run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice-v7.1.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DuoDice-v7-APK
-          path: DuoDice-v7.apk
+          name: DuoDice-v7.1-APK
+          path: DuoDice-v7.1.apk
           if-no-files-found: error
           retention-days: 30
