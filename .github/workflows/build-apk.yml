@@ -1,4 +1,4 @@
-name: Build DuoDice APK v13 Extreme Kama50
+name: Build DuoDice APK v13.1 Diagnostic
 
 on:
   workflow_dispatch:
@@ -11,6 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -40,9 +43,10 @@ jobs:
         run: |
           rm -rf source
           mkdir source
-          unzip -q DuoDice-Android-v13.zip -d source
+          unzip -q DuoDice-Android-v13.1.zip -d source
 
       - name: Download and embed 50 licensed Wikimedia illustrations
+        timeout-minutes: 8
         working-directory: source/DuoDice
         run: bash scripts/download_wikimedia_assets.sh
 
@@ -52,18 +56,33 @@ jobs:
           count=$(find app/src/main/res/drawable-nodpi -name 'position_*.webp' -type f -size +1000c | wc -l)
           echo "Found $count position assets"
           test "$count" -eq 50
+          du -sh app/src/main/res/drawable-nodpi
+
+      - name: Preflight Android resources
+        timeout-minutes: 6
+        working-directory: source/DuoDice
+        run: |
+          gradle --no-daemon --max-workers=2 --console=plain :app:processDebugResources --stacktrace --info
+
+      - name: Preflight Kotlin compilation
+        timeout-minutes: 8
+        working-directory: source/DuoDice
+        run: |
+          gradle --no-daemon --max-workers=2 --console=plain :app:compileDebugKotlin --stacktrace --info
 
       - name: Build debug APK
+        timeout-minutes: 8
         working-directory: source/DuoDice
-        run: gradle --no-daemon :app:assembleDebug --stacktrace
+        run: |
+          gradle --no-daemon --max-workers=2 --console=plain :app:assembleDebug --stacktrace --info
 
       - name: Prepare APK
-        run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice-v13.apk
+        run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice-v13.1.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DuoDice-v13-Extreme-Kama50-APK
-          path: DuoDice-v13.apk
+          name: DuoDice-v13.1-Extreme-Kama50-APK
+          path: DuoDice-v13.1.apk
           if-no-files-found: error
           retention-days: 30
