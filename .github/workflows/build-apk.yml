@@ -1,4 +1,4 @@
-name: Build DuoDice APK v13.1 Diagnostic
+name: Build DuoDice APK v15 Clear Kama + Random
 
 on:
   workflow_dispatch:
@@ -11,9 +11,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    env:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dkotlin.compiler.execution.strategy=in-process
+    timeout-minutes: 20
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -43,46 +42,32 @@ jobs:
         run: |
           rm -rf source
           mkdir source
-          unzip -q DuoDice-Android-v13.1.zip -d source
+          unzip -q DuoDice-Android-v15.zip -d source
 
-      - name: Download and embed 50 licensed Wikimedia illustrations
+      - name: Download and embed 17 verified modern Wikimedia illustrations
         timeout-minutes: 8
         working-directory: source/DuoDice
         run: bash scripts/download_wikimedia_assets.sh
 
-      - name: Verify 50 embedded illustrations
+      - name: Verify 17 embedded illustrations
         working-directory: source/DuoDice
         run: |
           count=$(find app/src/main/res/drawable-nodpi -name 'position_*.webp' -type f -size +1000c | wc -l)
           echo "Found $count position assets"
-          test "$count" -eq 50
-          du -sh app/src/main/res/drawable-nodpi
-
-      - name: Preflight Android resources
-        timeout-minutes: 6
-        working-directory: source/DuoDice
-        run: |
-          gradle --no-daemon --max-workers=2 --console=plain :app:processDebugResources --stacktrace --info
-
-      - name: Preflight Kotlin compilation
-        timeout-minutes: 8
-        working-directory: source/DuoDice
-        run: |
-          gradle --no-daemon --max-workers=2 --console=plain :app:compileDebugKotlin --stacktrace --info
+          test "$count" -eq 17
 
       - name: Build debug APK
-        timeout-minutes: 8
+        timeout-minutes: 10
         working-directory: source/DuoDice
-        run: |
-          gradle --no-daemon --max-workers=2 --console=plain :app:assembleDebug --stacktrace --info
+        run: gradle --no-daemon --max-workers=2 :app:assembleDebug --stacktrace
 
       - name: Prepare APK
-        run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice-v13.1.apk
+        run: cp source/DuoDice/app/build/outputs/apk/debug/app-debug.apk DuoDice-v15.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DuoDice-v13.1-Extreme-Kama50-APK
-          path: DuoDice-v13.1.apk
+          name: DuoDice-v15-ClearKamaRandom-APK
+          path: DuoDice-v15.apk
           if-no-files-found: error
           retention-days: 30
